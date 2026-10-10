@@ -8,14 +8,21 @@
 <meta name="description" content="Ubah gambar menjadi vector SVG dan XML Alight Motion. Hapus background, trace di server, ekspor langsung.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230b0f08'/%3E%3Cpath d='M7 22c3-10 7-13 11-13s7 4 7 9' fill='none' stroke='%2398ce7b' stroke-width='3' stroke-linecap='round'/%3E%3Ccircle cx='7' cy='22' r='2.6' fill='%2398ce7b'/%3E%3Ccircle cx='25' cy='18' r='2.6' fill='%2398ce7b'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="assets/app.css">
+<link rel="stylesheet" href="assets/extras.css">
+<script>if(!matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.classList.add("intro-on")</script>
 </head>
 <body>
+<div id="intro" role="dialog" aria-modal="true" aria-label="Intro Auto Trace"><canvas id="introCv" aria-hidden="true"></canvas><button type="button" id="introSkip">LEWATI ›</button></div>
 <header class="top">
   <div class="brand">
     <svg class="mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M5 23c3-11 8-15 13-15s8 5 9 10" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><circle cx="5" cy="23" r="3" fill="currentColor"/><circle cx="27" cy="18" r="3" fill="currentColor"/></svg>
     <div><h1>Auto Trace</h1><p>Gambar → SVG → XML Alight Motion</p></div>
   </div>
+  <div class="top-r">
   <span class="chip" id="srv" role="status" title="Status mesin trace di server">Server: memeriksa…</span>
+  <div class="menu-wrap"><button type="button" class="kebab" id="menuBtn" aria-label="Menu" aria-haspopup="menu" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="2" fill="currentColor"/><circle cx="12" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="19" r="2" fill="currentColor"/></svg></button>
+  <div class="menu" id="menu" role="menu" hidden><button type="button" role="menuitem" data-act="docs">Dokumen</button><button type="button" role="menuitem" data-act="credit">Credit</button><button type="button" role="menuitem" data-act="intro">Putar ulang intro</button></div></div>
+  </div>
 </header>
 
 <main class="layout">
@@ -115,8 +122,53 @@
 <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 <input type="file" id="f" accept="image/png,image/jpeg,image/webp" hidden>
 
+<dialog class="doc" id="dlgDocs" aria-labelledby="docT"><div class="doc-h"><h2 id="docT">Dokumen · Cara pakai</h2><button type="button" aria-label="Tutup">✕</button></div><div class="doc-b">
+<ol><li>Pilih foto.</li><li>Hapus background bila perlu.</li><li>Pilih Jenis gambar.</li><li>Tekan Trace sekarang.</li><li>Cek hasilnya, lalu Unduh SVG atau XML Alight dan impor XML di Alight Motion.</li></ol>
+<details open><summary>Foto</summary><dl>
+<dt>Pilih / tarik / tempel</dt><dd>PNG, JPG, atau WEBP (maks 30 MB). Bisa tarik file ke halaman atau tempel dengan Ctrl+V. Sisi terpanjang otomatis diperkecil ke 1200 px agar cepat.</dd>
+<dt>Kartu berkas</dt><dd>Menampilkan thumbnail, nama, ukuran, dan dimensi. Tombol Ganti foto untuk memuat foto lain.</dd>
+<dt>Tab 1 Foto &amp; background / 2 Hasil trace</dt><dd>Tab 2 aktif setelah trace selesai.</dd></dl></details>
+<details><summary>Alat background</summary><dl>
+<dt>Pipet</dt><dd>Ketuk warna latar di foto untuk menghapusnya. Ketuk lagi untuk latar yang banyak warna.</dd>
+<dt>Hapus / Pulihkan</dt><dd>Kuas manual untuk menghapus atau mengembalikan bagian foto. Ukuran kuas 4–120 px.</dd>
+<dt>Urungkan</dt><dd>Membatalkan sampai 12 langkah kuas terakhir.</dd>
+<dt>Reset</dt><dd>Menghapus semua edit kuas manual.</dd></dl></details>
+<details><summary>Pengaturan Background</summary><dl>
+<dt>Hapus background</dt><dd>Saklar utama. Latar seragam di tepi foto terdeteksi otomatis saat foto dimuat.</dd>
+<dt>Chip warna (×)</dt><dd>Warna latar yang dipilih. Tekan × untuk melepas satu warna.</dd>
+<dt>Deteksi dari tepi foto</dt><dd>Mengambil sampai 3 warna dominan dari tepi foto sebagai latar.</dd>
+<dt>Lepas semua warna</dt><dd>Mengosongkan semua warna latar.</dd>
+<dt>Toleransi warna (2–70)</dt><dd>Seberapa mirip sebuah warna agar dianggap latar. Naikkan bila sisa latar masih ada, turunkan bila objek ikut terhapus.</dd>
+<dt>Rapikan tepi (0–8 px)</dt><dd>Mengikis tepi objek untuk membuang pinggiran halo atau sisa latar.</dd>
+<dt>Hanya yang tersambung ke tepi foto</dt><dd>Warna sama di dalam objek (misalnya lubang huruf O) tidak ikut terhapus.</dd>
+<dt>Pakai transparansi bawaan PNG</dt><dd>Muncul bila PNG punya area transparan. Area itu dipertahankan sebagai latar.</dd></dl></details>
+<details><summary>Trace</summary><dl>
+<dt>Jenis gambar</dt><dd>Preset: Anime/ilustrasi (14 warna), Logo/flat (6), Foto (20), Hitam-putih (2). Mengubah slider apa pun berpindah ke Kustom.</dd>
+<dt>Jumlah warna (2–32)</dt><dd>Banyak warna maksimum di hasil. Lebih banyak = lebih mirip foto, tetapi lebih banyak layer.</dd>
+<dt>Isi bentuk, Ambang, Warna tinta</dt><dd>Khusus hitam-putih. Pilih bagian gelap, terang, atau keduanya. Ambang otomatis memakai metode Otsu; matikan untuk atur manual (10–245). Warna tinta menentukan warna bentuk.</dd>
+<dt>Buang bercak kecil (px²)</dt><dd>Membuang titik kecil. Naikkan untuk hasil lebih bersih.</dd>
+<dt>Buang garis tipis (px)</dt><dd>Membuang area lebih tipis dari nilai ini, berguna untuk sisa artefak JPEG.</dd>
+<dt>Kehalusan kontur</dt><dd>Makin besar makin mulus dan sederhana; makin kecil makin setia pada bentuk asli.</dd>
+<dt>Maksimum layer (10–400)</dt><dd>Batas jumlah shape. Layer lebih sedikit membuat Alight lebih ringan.</dd>
+<dt>Potong lubang transparan</dt><dd>Latar yang terkurung dalam objek menjadi lubang sungguhan. Matikan bila di Alight lubangnya terisi penuh.</dd>
+<dt>Mesin</dt><dd>Otomatis (server, cadangan lokal), Server saja, atau Lokal di perangkat.</dd></dl></details>
+<details><summary>Alight Motion</summary><dl>
+<dt>Ukuran scene (200–4000 px)</dt><dd>Sisi terpanjang scene di XML. Bawaan 1440.</dd>
+<dt>Warna latar scene</dt><dd>Warna latar proyek di Alight.</dd></dl></details>
+<details><summary>Hasil &amp; unduh</summary><dl>
+<dt>Trace sekarang / Trace ulang</dt><dd>Menjalankan trace dengan pengaturan saat ini. Bilah progres dan status menunjukkan prosesnya.</dd>
+<dt>Pembanding Foto ⟷ Trace</dt><dd>Geser untuk membandingkan foto dengan hasil.</dd>
+<dt>Statistik</dt><dd>Jumlah shape, titik, lubang, mesin yang dipakai, waktu, dan ukuran scene. Muncul peringatan bila layer lebih dari 250.</dd>
+<dt>Unduh SVG / Unduh XML Alight</dt><dd>SVG untuk editor vector. XML untuk diimpor ke Alight Motion.</dd>
+<dt>Chip Server</dt><dd>Menunjukkan server siap atau tidak. Bila tidak, trace berjalan di perangkat.</dd>
+<dt>Pengaturan tersimpan</dt><dd>Pilihanmu diingat di perangkat ini untuk kunjungan berikutnya.</dd></dl></details>
+</div></dialog>
+<dialog class="doc" id="dlgCredit" aria-labelledby="crT"><div class="doc-h"><h2 id="crT">Credit</h2><button type="button" aria-label="Tutup">✕</button></div><div class="doc-b"><div class="credit"><span>Pencipta web</span><strong>Gyzeen2K</strong><span>Auto Trace v2 · Gambar → SVG → XML Alight Motion</span></div></div></dialog>
+
 <script src="lib/engine.js"></script>
 <script src="src/svg2am.js"></script>
 <script src="assets/app.js"></script>
+<script src="assets/menu.js"></script>
+<script src="assets/intro.js"></script>
 </body>
 </html>
