@@ -6,12 +6,14 @@
   var MAXW = 1200, GHOST = 38, MAX_UPLOAD = 4.2e6;
 
   var PRESETS = {
-    anime: { colors: 14, minArea: 16, minThickness: 1.5, smooth: 1.8, maxShapes: 160, denoise: 1 },
-    logo: { colors: 6, minArea: 10, minThickness: 0.8, smooth: 1.2, maxShapes: 80, denoise: 0 },
-    photo: { colors: 20, minArea: 30, minThickness: 1.5, smooth: 2.2, maxShapes: 300, denoise: 2 },
-    bw: { colors: 2, minArea: 12, minThickness: 1.0, smooth: 1.6, maxShapes: 120, denoise: 1 }
+    anime: { colors: 14, minArea: 10, minThickness: 1.0, smooth: 1.5, maxShapes: 220, denoise: 1, lineArt: true, lineSens: 6 },
+    animeDetail: { colors: 18, minArea: 5, minThickness: 0.5, smooth: 1.0, maxShapes: 400, denoise: 1, lineArt: true, lineSens: 8 },
+    animeSimple: { colors: 8, minArea: 40, minThickness: 1.6, smooth: 2.2, maxShapes: 70, denoise: 1, lineArt: true, lineSens: 4 },
+    logo: { colors: 6, minArea: 10, minThickness: 0.8, smooth: 1.2, maxShapes: 80, denoise: 0, lineArt: false, lineSens: 6 },
+    photo: { colors: 20, minArea: 30, minThickness: 1.5, smooth: 2.2, maxShapes: 300, denoise: 2, lineArt: false, lineSens: 6 },
+    bw: { colors: 2, minArea: 12, minThickness: 1.0, smooth: 1.6, maxShapes: 120, denoise: 1, lineArt: false, lineSens: 6 }
   };
-  var SAVE_IDS = ['preset', 'colors', 'minArea', 'minThickness', 'smooth', 'maxShapes', 'holes', 'engine', 'sceneSize', 'sceneBg', 'tol', 'shrink', 'edgeOnly', 'bwFill', 'ink'];
+  var SAVE_IDS = ['preset', 'colors', 'lineArt', 'lineSens', 'minArea', 'minThickness', 'smooth', 'maxShapes', 'holes', 'engine', 'sceneSize', 'sceneBg', 'tol', 'shrink', 'edgeOnly', 'bwFill', 'ink'];
 
   var S = { name: '', W: 0, H: 0, src: null, lab: null, hasAlpha: false, seeds: [], manual: null, keep: null, disp: null, hist: [], tool: 'pick', denoise: 1, result: null, svg: '', xml: '', busy: false, thumbUrl: '' };
   var ctx = $('cv').getContext('2d', { willReadFrequently: true });
@@ -37,6 +39,7 @@
   function applyPreset(name) {
     var p = PRESETS[name]; if (!p) return;
     ['colors', 'minArea', 'minThickness', 'smooth', 'maxShapes'].forEach(function (k) { $(k).value = p[k]; $(k).dispatchEvent(new Event('input')); });
+    $('lineArt').checked = !!p.lineArt; $('lineSens').value = p.lineSens; $('lineSens').dispatchEvent(new Event('input'));
     S.denoise = p.denoise;
     updateModeUI();
   }
@@ -44,12 +47,12 @@
   function markCustom() { var s = $('preset'); s.querySelector('[value=custom]').hidden = false; s.value = 'custom'; updateModeUI(); }
   function collectOpts() {
     var bw = $('preset').value === 'bw';
-    return { mode: bw ? 'bw' : 'color', colors: +$('colors').value, minArea: +$('minArea').value, minThickness: +$('minThickness').value, smooth: +$('smooth').value, maxShapes: +$('maxShapes').value, holes: $('holes').checked, denoise: S.denoise, bwFill: $('bwFill').value, bwThreshold: $('bwAuto').checked ? 'auto' : +$('bwThr').value, ink: $('ink').value };
+    return { mode: bw ? 'bw' : 'color', colors: +$('colors').value, minArea: +$('minArea').value, minThickness: +$('minThickness').value, smooth: +$('smooth').value, maxShapes: +$('maxShapes').value, holes: $('holes').checked, lineArt: $('lineArt').checked, lineDelta: Math.round(42 - 3.4 * +$('lineSens').value), denoise: S.denoise, bwFill: $('bwFill').value, bwThreshold: $('bwAuto').checked ? 'auto' : +$('bwThr').value, ink: $('ink').value };
   }
-  function saveSettings() { try { var o = {}; SAVE_IDS.forEach(function (id) { var e = $(id); o[id] = e.type === 'checkbox' ? e.checked : e.value; }); o._d = S.denoise; localStorage.setItem('autotrace.v2', JSON.stringify(o)); } catch (_) { } }
+  function saveSettings() { try { var o = {}; SAVE_IDS.forEach(function (id) { var e = $(id); o[id] = e.type === 'checkbox' ? e.checked : e.value; }); o._d = S.denoise; localStorage.setItem('autotrace.v21', JSON.stringify(o)); } catch (_) { } }
   function loadSettings() {
     try {
-      var o = JSON.parse(localStorage.getItem('autotrace.v2') || 'null'); if (!o) return false;
+      var o = JSON.parse(localStorage.getItem('autotrace.v21') || 'null'); if (!o) return false;
       SAVE_IDS.forEach(function (id) { var e = $(id); if (o[id] === undefined) return; if (e.type === 'checkbox') e.checked = !!o[id]; else e.value = o[id]; if (id === 'preset' && o[id] === 'custom') e.querySelector('[value=custom]').hidden = false; });
       if (typeof o._d === 'number') S.denoise = o._d; return true;
     } catch (_) { return false; }
@@ -273,7 +276,7 @@
   }
   function renderStats() {
     var res = S.result, st = res.stats || {}, d = sceneDims(); $('stats').innerHTML = '';
-    [['shape', res.shapes.length], ['titik', st.points || '–'], ['lubang', st.holes || 0], ['mesin', S.via], ['waktu', (S.ms / 1000).toFixed(1) + ' dtk'], ['scene', d.w + '×' + d.h]].forEach(function (a) { var el = document.createElement('span'); el.innerHTML = a[0] + ' <b></b>'; el.querySelector('b').textContent = a[1]; $('stats').appendChild(el); });
+    [['shape', res.shapes.length], ['titik', st.points || '–'], ['lubang', st.holes || 0], ['garis', st.lines || 0], ['mesin', S.via], ['waktu', (S.ms / 1000).toFixed(1) + ' dtk'], ['scene', d.w + '×' + d.h]].forEach(function (a) { var el = document.createElement('span'); el.innerHTML = a[0] + ' <b></b>'; el.querySelector('b').textContent = a[1]; $('stats').appendChild(el); });
   }
   function setCmp(v) { $('cmpOrig').style.clipPath = 'inset(0 ' + (100 - v) + '% 0 0)'; $('cmpHandle').style.left = v + '%'; }
   function download(text, name, type) { var a = document.createElement('a'), u = URL.createObjectURL(new Blob([text], { type: type })); a.href = u; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(u); }, 4000); }
@@ -282,7 +285,8 @@
   function init() {
     bindRanges(); bindCanvas();
     var restored = loadSettings(); if (!restored) applyPreset('anime'); else updateModeUI();
-    ['colors', 'minArea', 'minThickness', 'smooth', 'maxShapes'].forEach(function (id) { $(id).addEventListener('input', markCustom); });
+    ['colors', 'minArea', 'minThickness', 'smooth', 'maxShapes', 'lineSens'].forEach(function (id) { $(id).addEventListener('input', markCustom); });
+    $('lineArt').addEventListener('change', markCustom);
     $('preset').addEventListener('change', function () { applyPreset($('preset').value); });
     $('bwAuto').addEventListener('change', function () { $('bwThr').disabled = $('bwAuto').checked; });
     ['tol', 'shrink'].forEach(function (id) { $(id).addEventListener('input', applyMask); });
