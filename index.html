@@ -82,9 +82,11 @@
     <details class="card" open>
       <summary>Trace</summary>
       <label class="fld"><span>Jenis gambar</span>
-        <select id="preset"><option value="anime">Anime / ilustrasi</option><option value="logo">Logo / flat</option><option value="photo">Foto</option><option value="bw">Hitam-putih</option><option value="custom" hidden>Kustom</option></select></label>
+        <select id="preset"><option value="anime">Anime / ilustrasi</option><option value="animeDetail">Anime detail (line art)</option><option value="animeSimple">Anime simple (bersih)</option><option value="logo">Logo / flat</option><option value="photo">Foto</option><option value="bw">Hitam-putih</option><option value="custom" hidden>Kustom</option></select></label>
       <div id="colorOnly">
         <label class="fld"><span>Jumlah warna <output id="o-colors">14</output></span><input type="range" id="colors" min="2" max="32" value="14"></label>
+        <label class="check"><input type="checkbox" id="lineArt" checked> <span>Tangkap line art (garis tipis gelap)</span></label>
+        <label class="fld"><span>Kepekaan garis <output id="o-lineSens">6</output></span><input type="range" id="lineSens" min="1" max="10" value="6"></label>
       </div>
       <div id="bwOnly" hidden>
         <label class="fld"><span>Isi bentuk</span><select id="bwFill"><option value="dark">Bagian gelap</option><option value="light">Bagian terang</option><option value="both">Keduanya</option></select></label>
@@ -143,7 +145,9 @@
 <dt>Hanya yang tersambung ke tepi foto</dt><dd>Warna sama di dalam objek (misalnya lubang huruf O) tidak ikut terhapus.</dd>
 <dt>Pakai transparansi bawaan PNG</dt><dd>Muncul bila PNG punya area transparan. Area itu dipertahankan sebagai latar.</dd></dl></details>
 <details><summary>Trace</summary><dl>
-<dt>Jenis gambar</dt><dd>Preset: Anime/ilustrasi (14 warna), Logo/flat (6), Foto (20), Hitam-putih (2). Mengubah slider apa pun berpindah ke Kustom.</dd>
+<dt>Jenis gambar</dt><dd>Preset: Anime/ilustrasi (14 warna), Anime detail (18 warna, line art halus, sampai 400 layer), Anime simple (8 warna, hanya garis utama, ±70 layer), Logo/flat (6), Foto (20), Hitam-putih (2). Mengubah slider apa pun berpindah ke Kustom.</dd>
+<dt>Tangkap line art</dt><dd>Mencari garis tipis gelap (garis rambut, bulu mata, kontur mata) dan membuatnya jadi layer terpisah di atas warna, supaya tidak hilang. Hanya untuk mode warna.</dd>
+<dt>Kepekaan garis (1–10)</dt><dd>Makin besar makin banyak garis yang tertangkap, termasuk garis samar. Turunkan bila tekstur latar ikut jadi garis.</dd>
 <dt>Jumlah warna (2–32)</dt><dd>Banyak warna maksimum di hasil. Lebih banyak = lebih mirip foto, tetapi lebih banyak layer.</dd>
 <dt>Isi bentuk, Ambang, Warna tinta</dt><dd>Khusus hitam-putih. Pilih bagian gelap, terang, atau keduanya. Ambang otomatis memakai metode Otsu; matikan untuk atur manual (10–245). Warna tinta menentukan warna bentuk.</dd>
 <dt>Buang bercak kecil (px²)</dt><dd>Membuang titik kecil. Naikkan untuk hasil lebih bersih.</dd>
