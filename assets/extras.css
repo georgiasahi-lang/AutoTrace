@@ -1,0 +1,46 @@
+/* Auto Trace v2.1 — intro, menu titik 3, dialog Dokumen & Credit */
+#intro{position:fixed;inset:0;z-index:1000;background:#0b0f08;display:none}
+html.intro-on #intro{display:block}
+html.intro-on body{overflow:hidden}
+#introCv{position:absolute;inset:0;width:100%;height:100%;display:block}
+#introSkip{position:absolute;top:max(12px,env(safe-area-inset-top));right:14px;min-height:40px;padding:0 16px;border:1px solid #fff;background:transparent;color:#fff;mix-blend-mode:difference;border-radius:99px;font:600 12px ui-monospace,Menlo,Consolas,monospace;letter-spacing:.08em;cursor:pointer}
+.top-r{display:flex;align-items:center;gap:8px}
+.menu-wrap{position:relative}
+.kebab{width:40px;height:40px;border:1px solid var(--line);background:var(--surface);border-radius:12px;color:var(--tx);display:grid;place-items:center;cursor:pointer}
+.kebab svg{width:20px;height:20px}
+.menu{position:absolute;right:0;top:46px;min-width:210px;background:var(--surface2);border:1px solid var(--line2);border-radius:12px;padding:6px;z-index:50;box-shadow:0 12px 32px rgba(0,0,0,.5)}
+.menu button{display:block;width:100%;text-align:left;min-height:42px;padding:0 12px;background:none;border:0;border-radius:8px;cursor:pointer}
+.menu button:hover,.menu button:focus-visible{background:var(--surface)}
+dialog.doc{width:min(680px,calc(100vw - 24px));max-height:86vh;background:var(--surface);color:var(--tx);border:1px solid var(--line2);border-radius:16px;padding:0}
+dialog.doc::backdrop{background:rgba(5,8,3,.72)}
+.doc-h{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}
+.doc-h h2{margin:0;font-size:17px}
+.doc-h button{min-height:40px;min-width:40px;border:1px solid var(--line);background:var(--bg);border-radius:10px;cursor:pointer}
+.doc-b{padding:6px 16px 20px;overflow:auto;max-height:calc(86vh - 66px);font-size:14px}
+.doc details{border-bottom:1px solid var(--line);padding:6px 0}
+.doc summary{font-weight:600;cursor:pointer;min-height:38px;display:flex;align-items:center}
+.doc dl{margin:2px 0 8px}.doc dt{color:var(--ac);font-weight:600;margin-top:9px}.doc dd{margin:2px 0 0;color:var(--mu)}
+.doc ol{margin:6px 0 10px;padding-left:20px;color:var(--mu)}
+.credit{text-align:center;padding:26px 8px}
+.credit strong{display:block;font-size:26px;letter-spacing:-.01em;color:var(--ac)}
+.credit span{display:block;color:var(--mu);margin-top:6px}
+
+/* ===== Perbaikan layout (v2.1.1): tidak ada lebar berlebih, header rapi di semua ukuran layar ===== */
+html{overflow-x:hidden;-webkit-text-size-adjust:100%}
+body{min-width:0;overflow-wrap:anywhere}
+.top{max-width:1120px;margin:0 auto;padding:14px 0 10px;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"brand menu" "chip chip";align-items:center;gap:8px 10px}
+.brand{grid-area:brand;min-width:0}
+.brand>div{min-width:0}
+.brand p{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top-r{display:contents}
+.top-r>.chip{grid-area:chip;justify-self:start;max-width:100%;overflow:hidden;text-overflow:ellipsis;font-size:11.5px}
+.menu-wrap{grid-area:menu}
+.menu{max-width:calc(100vw - 32px)}
+.layout{grid-template-columns:minmax(0,1fr)}
+.layout>*,.controls>*{min-width:0}
+@media (min-width:640px){
+  .top{grid-template-columns:minmax(0,1fr) auto auto;grid-template-areas:"brand chip menu"}
+  .top-r>.chip{justify-self:end}
+}
+@media (min-width:901px){.layout{grid-template-columns:minmax(0,1.25fr) minmax(300px,.85fr)}}
+@media (max-width:480px){.tab{font-size:12.5px;padding:0 6px;white-space:nowrap}}
