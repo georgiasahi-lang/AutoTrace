@@ -5,7 +5,7 @@ const { trace } = require('../lib/engine.js');
 const { decodePNG } = require('../lib/png.js');
 
 const MAX_BYTES = 4.4 * 1024 * 1024;   // batas body fungsi Vercel ≈ 4.5 MB
-const NUM = { colors: [2, 40], minArea: [0, 2000], minThickness: [0, 8], smooth: [0.3, 6], fitError: [0.2, 3], maxShapes: [1, 600], bleed: [0, 2], denoise: [0, 2], cornerAngle: [20, 120], merge: [0, 30], alphaCut: [1, 255] };
+const NUM = { colors: [2, 40], minArea: [0, 2000], minThickness: [0, 8], smooth: [0.3, 6], fitError: [0.2, 3], maxShapes: [1, 600], lineDelta: [4, 60], lineMinArea: [1, 100], bleed: [0, 2], denoise: [0, 2], cornerAngle: [20, 120], merge: [0, 30], alphaCut: [1, 255] };
 
 function send(res, code, obj) {
   const body = JSON.stringify(obj);
@@ -30,6 +30,7 @@ function cleanOpts(raw) {
   if (raw.mode === 'bw' || raw.mode === 'color') o.mode = raw.mode;
   for (const k of Object.keys(NUM)) if (raw[k] !== undefined && isFinite(+raw[k])) o[k] = Math.min(NUM[k][1], Math.max(NUM[k][0], +raw[k]));
   if (typeof raw.holes === 'boolean') o.holes = raw.holes;
+  if (typeof raw.lineArt === 'boolean') o.lineArt = raw.lineArt;
   if (['dark', 'light', 'both'].includes(raw.bwFill)) o.bwFill = raw.bwFill;
   if (raw.bwThreshold === 'auto' || (isFinite(+raw.bwThreshold) && raw.bwThreshold !== null)) o.bwThreshold = raw.bwThreshold === 'auto' ? 'auto' : Math.min(255, Math.max(0, +raw.bwThreshold));
   if (typeof raw.ink === 'string' && /^#[0-9a-f]{6}$/i.test(raw.ink)) o.ink = raw.ink;
